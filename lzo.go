@@ -106,11 +106,14 @@ func NewCompressor(level LzoAlgorithm) (*Compressor, os.Error) {
 	return z, nil
 }
 
+
+// Version returns the version of the LZO library being used
 func Version() string {
 	p := C.lzo_version_string()
 	return C.GoString(p)
 }
 
+// Compress compresses a byte array and returns the compressed stream
 func (z *Compressor) Compress(b []byte) ([]byte, os.Error) {
 
 	// our output buffer, sized to contain a worst-case compression
@@ -130,6 +133,8 @@ func (z *Compressor) Compress(b []byte) ([]byte, os.Error) {
 	return out[0:out_size], nil
 }
 
+// Decompress decompresses the byte array b passed in into the byte array o, and returns the size of the valid uncompressed data.
+// If o is not large enough to hold the  compressed data, an error is returned.
 func (z *Compressor) Decompress(b []byte, o []byte) (uint, os.Error) {
 
 	// both and input param (size of 'o') and output param (decompressed size)
