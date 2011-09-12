@@ -22,7 +22,7 @@ func read8(r io.Reader) uint {
 	var u uint8
 	err := binary.Read(r, binary.BigEndian, &u)
 	if err != nil {
-		fatal(fmt.Sprint("read failed: ", err))
+		fatal("read failed: ", err)
 	}
 	return uint(u)
 }
@@ -31,7 +31,7 @@ func read32(r io.Reader) uint {
 	var u uint32
 	err := binary.Read(r, binary.BigEndian, &u)
 	if err != nil {
-		fatal(fmt.Sprint("read failed: ", err))
+		fatal("read failed: ", err)
 	}
 	return uint(u)
 }
@@ -39,19 +39,20 @@ func read32(r io.Reader) uint {
 func write8(w io.Writer, c byte) {
 	err := binary.Write(w, binary.BigEndian, c)
 	if err != nil {
-		fatal(fmt.Sprint("write failed: ", err))
+		fatal("write failed: ", err)
 	}
 }
 
 func write32(w io.Writer, ui uint32) {
 	err := binary.Write(w, binary.BigEndian, ui)
 	if err != nil {
-		fatal(fmt.Sprint("write failed: ", err))
+		fatal("write failed: ", err)
 	}
 }
 
-func fatal(s string) {
-	fmt.Fprintln(os.Stderr, "FATAL: ", s)
+func fatal(a... interface{}) {
+        s := fmt.Sprint(a...)
+	fmt.Fprintln(os.Stderr, "FATAL:", s)
 	os.Exit(1)
 }
 
@@ -86,7 +87,7 @@ func do_compress(in *os.File, out *os.File, level uint, blocksize uint) {
 		}
 
 		if err != nil {
-			fatal(fmt.Sprint("read failed: ", err))
+			fatal("read failed: ", err)
 		}
 
 		// update checksum
@@ -138,11 +139,11 @@ func do_decompress(in *os.File, out *os.File) {
 	block_size := read32(in)
 
 	if method != 1 {
-		fatal(fmt.Sprint("header error - unknown compression method: ", method, " (level: ", level, ")"))
+		fatal("header error - unknown compression method: ", method, " (level: ", level, ")")
 	}
 
 	if block_size < 1024 || block_size > 8*1024*1024 {
-		fatal(fmt.Sprint("header error -- invalid block size: ", block_size))
+		fatal("header error -- invalid block size: ", block_size)
 	}
 
 	z, _ := lzo.NewCompressor(lzo.Lzo1x_1)
@@ -168,7 +169,7 @@ func do_decompress(in *os.File, out *os.File) {
 		}
 
 		if err != nil {
-			fatal(fmt.Sprint(err))
+			fatal(err)
 		}
 
 		if compressed_blocksize == uncompressed_blocksize {
@@ -236,13 +237,13 @@ func main() {
 
 	in_file, err := os.Open(flag.Arg(0))
 	if err != nil {
-		fatal(fmt.Sprint("error opening input file: ", flag.Arg(0), ": ", err))
+		fatal("input file: ", err)
 	}
 
 	out_file, err := os.Create(flag.Arg(1))
 
 	if err != nil {
-		fatal(fmt.Sprint("error opening output file: ", flag.Arg(1), ": ", err))
+		fatal("output file: ", err)
 	}
 
 	if *flag_decompress {
