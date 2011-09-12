@@ -1,6 +1,6 @@
 // Example program for lzo.go
 // This program is based heavily off the 'lzopack' example from the LZO library
-// License: GPL
+// License: GPLv3 or later
 // Copyright (C) 2011 Damian Gryski <damian@gryski.com>
 
 package main
