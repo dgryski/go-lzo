@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"hash/adler32"
 	"io"
-	"_obj/lzo"
+	"../_obj/lzo"
 	"os"
 )
 
