@@ -75,9 +75,9 @@ const (
 )
 
 type Compressor struct {
-	level    LzoAlgorithm
-	compress func([]byte, []byte, *int, []byte) C.int
-	wrkmem   []byte
+	level      LzoAlgorithm
+	compress   func([]byte, []byte, *int, []byte) C.int
+	wrkmem_len int
 }
 
 func init() {
@@ -91,21 +91,17 @@ func NewCompressor(level LzoAlgorithm) (*Compressor, os.Error) {
 	z := new(Compressor)
 	z.level = level
 
-	var wrkmem_size C.int
 	switch z.level {
 	case Lzo1x_1:
 		z.compress = lzo1x_1_compress
-		wrkmem_size = C.lzo1x_1_mem_compress()
+		z.wrkmem_len = int(C.lzo1x_1_mem_compress())
 	case Lzo1x_999:
 		z.compress = lzo1x_999_compress
-		wrkmem_size = C.lzo1x_999_mem_compress()
+		z.wrkmem_len = int(C.lzo1x_999_mem_compress())
 	}
-
-	z.wrkmem = make([]byte, int(wrkmem_size))
 
 	return z, nil
 }
-
 
 // Version returns the version of the LZO library being used
 func Version() string {
@@ -123,7 +119,8 @@ func (z *Compressor) Compress(b []byte) ([]byte, os.Error) {
 	out_size = 0 // here it's used to store the size of the compressed data
 
 	var err C.int
-	err = z.compress(b, out, &out_size, z.wrkmem)
+	wrkmem := make([]byte, z.wrkmem_len)
+	err = z.compress(b, out, &out_size, wrkmem)
 
 	// compression failed :(
 	if err != 0 {
