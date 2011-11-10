@@ -6,13 +6,13 @@
 package main
 
 import (
+	"../_obj/lzo"
 	"bytes"
 	"encoding/binary"
 	"flag"
 	"fmt"
 	"hash/adler32"
 	"io"
-	"../_obj/lzo"
 	"os"
 )
 
@@ -50,8 +50,8 @@ func write32(w io.Writer, ui uint32) {
 	}
 }
 
-func fatal(a... interface{}) {
-        s := fmt.Sprint(a...)
+func fatal(a ...interface{}) {
+	s := fmt.Sprint(a...)
 	fmt.Fprintln(os.Stderr, "FATAL:", s)
 	os.Exit(1)
 }
@@ -204,7 +204,7 @@ func do_decompress(in *os.File, out *os.File) {
 func main() {
 
 	//        var flag_block_size *int = flag.Int("block-size", 256*1024, "block size to use for compression")
-        blocksize := uint(256 * 1024);
+	blocksize := uint(256 * 1024)
 
 	var flag_best_speed *bool = flag.Bool("1", false, "Use fastest compression algorithm")
 	var flag_best_compression *bool = flag.Bool("9", false, "Use best compression algorithm")
@@ -249,7 +249,7 @@ func main() {
 	if *flag_decompress {
 		do_decompress(in_file, out_file)
 	} else {
-		do_compress(in_file, out_file, level, blocksize);
+		do_compress(in_file, out_file, level, blocksize)
 	}
 
 	out_file.Close()
