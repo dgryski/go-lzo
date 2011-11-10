@@ -82,7 +82,7 @@ func do_compress(in *os.File, out *os.File, level uint, blocksize uint) {
 	for {
 		nr, err := in.Read(inb[:])
 
-		if nr == 0 && err == os.EOF {
+		if nr == 0 && err == io.EOF {
 			break
 		}
 
