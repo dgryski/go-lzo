@@ -23,7 +23,6 @@ import "C"
 
 import (
 	"fmt"
-	"os"
 	"unsafe"
 )
 
@@ -42,7 +41,7 @@ var errText = map[Errno]string{
 	-9: "[unused] not yet implemented",
 }
 
-func (e Errno) String() string {
+func (e Errno) Error() string {
 
 	s := errText[e]
 	if s == "" {
@@ -52,16 +51,16 @@ func (e Errno) String() string {
 }
 
 var (
-	ErrOk                os.Error = Errno(0)
-	ErrError             os.Error = Errno(-1)
-	ErrOutOfMemory       os.Error = Errno(-2) /* [not used right now] */
-	ErrNotCompressible   os.Error = Errno(-3) /* [not used right now] */
-	ErrInputOverrun      os.Error = Errno(-4)
-	ErrOutputOverrun     os.Error = Errno(-5)
-	ErrLookbehindOverrun os.Error = Errno(-6)
-	ErrEofNotFound       os.Error = Errno(-7)
-	ErrInputNotConsumed  os.Error = Errno(-8)
-	ErrNotYetImplemented os.Error = Errno(-9) /* [not used right now] */
+	ErrOk                error = Errno(0)
+	ErrError             error = Errno(-1)
+	ErrOutOfMemory       error = Errno(-2) /* [not used right now] */
+	ErrNotCompressible   error = Errno(-3) /* [not used right now] */
+	ErrInputOverrun      error = Errno(-4)
+	ErrOutputOverrun     error = Errno(-5)
+	ErrLookbehindOverrun error = Errno(-6)
+	ErrEofNotFound       error = Errno(-7)
+	ErrInputNotConsumed  error = Errno(-8)
+	ErrNotYetImplemented error = Errno(-9) /* [not used right now] */
 )
 
 type LzoAlgorithm int
@@ -86,7 +85,7 @@ func init() {
 	}
 }
 
-func NewCompressor(level LzoAlgorithm) (*Compressor, os.Error) {
+func NewCompressor(level LzoAlgorithm) (*Compressor, error) {
 
 	z := new(Compressor)
 	z.level = level
@@ -110,7 +109,7 @@ func Version() string {
 }
 
 // Compress compresses a byte array and returns the compressed stream
-func (z *Compressor) Compress(b []byte) ([]byte, os.Error) {
+func (z *Compressor) Compress(b []byte) ([]byte, error) {
 
 	// our output buffer, sized to contain a worst-case compression
 	out_size := lzo1x_1_output_size(len(b))
@@ -132,7 +131,7 @@ func (z *Compressor) Compress(b []byte) ([]byte, os.Error) {
 
 // Decompress decompresses the byte array b passed in into the byte array o, and returns the size of the valid uncompressed data.
 // If o is not large enough to hold the  compressed data, an error is returned.
-func (z *Compressor) Decompress(b []byte, o []byte) (uint, os.Error) {
+func (z *Compressor) Decompress(b []byte, o []byte) (uint, error) {
 
 	// both and input param (size of 'o') and output param (decompressed size)
 	out_size := uint(len(o))
