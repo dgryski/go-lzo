@@ -115,7 +115,7 @@ func do_compress(in *os.File, out *os.File, level uint, blocksize uint) {
 
 	// is this right?
 
-	hashb := h.Sum()
+	hashb := h.Sum(nil)
 	sum := (uint32(hashb[0]) << 24) | (uint32(hashb[1]) << 16) | (uint32(hashb[2]) << 8) | (uint32(hashb[3]) << 0)
 
 	binary.Write(out, binary.BigEndian, sum)
@@ -192,7 +192,7 @@ func do_decompress(in *os.File, out *os.File) {
 	if flags&1 == 1 {
 		checksum := read32(in)
 
-		hashb := h.Sum()
+		hashb := h.Sum(nil)
 		sum := (uint(hashb[0]) << 24) | (uint(hashb[1]) << 16) | (uint(hashb[2]) << 8) | (uint(hashb[3]) << 0)
 
 		if checksum != sum {
