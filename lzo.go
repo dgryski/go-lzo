@@ -1,6 +1,10 @@
-// Package LZO provides access to the LZO library, version 2.05
-// License: GPLv3 or later
-// Copyright (C) 2011 Damian Gryski <damian@gryski.com>
+/*
+Package LZO provides access to the LZO library, version 2.05
+
+License: GPLv3 or later
+
+Copyright (C) 2011 Damian Gryski <damian@gryski.com>
+*/
 package lzo
 
 /*
