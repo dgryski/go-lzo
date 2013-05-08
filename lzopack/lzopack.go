@@ -6,11 +6,11 @@
 package main
 
 import (
-	"github.com/dgryski/dgolzo"
 	"bytes"
 	"encoding/binary"
 	"flag"
 	"fmt"
+	"github.com/dgryski/dgolzo"
 	"hash/adler32"
 	"io"
 	"os"
