@@ -132,6 +132,46 @@ func (z *Compressor) Compress(b []byte) ([]byte, error) {
 	return out[0:out_size], nil
 }
 
+/* Compress compresses a byte array and returns the compressed stream suitable 
+ for decompression by Python-LZO (https://github.com/jd-boyd/python-lzo)
+*/
+func (z *Compressor) Compress4PyString(b []byte) ([]byte, error) {
+
+	// our output buffer, sized to contain a worst-case compression
+	uncompr_size := len(b)
+	lzo_out_size := lzo1x_1_output_size(len(b))
+	out_size := 5 + lzo_out_size
+	out := make([]byte, out_size)
+
+	out_size = 0 // here it's used to store the size of the compressed data
+
+	var err C.int
+	wrkmem := make([]byte, z.wrkmem_len)
+	err = z.compress(b, out, &out_size, wrkmem)
+
+	// compression failed :(
+	if err != 0 {
+		return out[0:out_size], Errno(err)
+	}
+
+	// handling Python string header, see lzomodule.c/compress(PyObject *dummy, PyObject *args)
+	psh := make([]byte, 5)
+	switch z.level {
+	case Lzo1x_1:
+		psh[0] = 0xf0
+	case Lzo1x_999:
+		psh[0] = 0xf1
+	}
+	psh[1] = uint8((uncompr_size >> 24) & 0xff)
+	psh[2] = uint8((uncompr_size >> 16) & 0xff)
+	psh[3] = uint8((uncompr_size >> 8) & 0xff)
+	psh[4] = uint8((uncompr_size >> 0) & 0xff)
+
+	pystring := append(psh, out[0:out_size]...)
+
+	return pystring[0 : 5+out_size], nil
+}
+
 // Decompress decompresses the byte array b passed in into the byte array o, and returns the size of the valid uncompressed data.
 // If o is not large enough to hold the  compressed data, an error is returned.
 func (z *Compressor) Decompress(b []byte, o []byte) (uint, error) {
