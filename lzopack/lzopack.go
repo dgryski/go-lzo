@@ -162,14 +162,9 @@ func decompress(in *os.File, out *os.File) {
 		outb := make([]byte, uncompressedBlocksize)
 
 		compressedBlocksize := read32(in)
-		nr, err := in.Read(inb[:compressedBlocksize])
-
-		if nr == 0 {
-			fatal("unexpected end of file")
-		}
-
+		_, err := io.ReadFull(in, inb[:compressedBlocksize])
 		if err != nil {
-			fatal(err)
+			fatal("unexpected end of file")
 		}
 
 		if compressedBlocksize == uncompressedBlocksize {
