@@ -232,10 +232,6 @@ func main() {
 		level = 9
 	}
 
-	if *flagBestSpeed && *flagBestCompression && *flagDecompress {
-		// passing compression levels when decompressing is pointless
-	}
-
 	inFile, err := os.Open(flag.Arg(0))
 	if err != nil {
 		fatal("input file: ", err)
