@@ -128,9 +128,8 @@ func decompress(in *os.File, out *os.File) {
 
 	var magic [7]byte
 
-	in.Read(magic[:])
-
-	if bytes.Compare(magic[:], magicHeader[:]) != 0 {
+	_, err := io.ReadFull(in, magic[:])
+	if err != nil || bytes.Compare(magic[:], magicHeader[:]) != 0 {
 		fatal("header error -- this file was not compressed with lzopack")
 	}
 
