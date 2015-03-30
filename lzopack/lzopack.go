@@ -214,15 +214,15 @@ func main() {
 
 	var level uint
 
-	if *flagBestSpeed && *flagBestCompression {
+	switch {
+	case *flagBestSpeed && *flagBestCompression:
 		fmt.Fprintln(os.Stderr, "Can only specify one of -1 -9")
 		os.Exit(1)
-	} else if *flagBestSpeed {
+	case *flagBestSpeed:
 		level = 1
-	} else if *flagBestCompression {
+	case *flagBestCompression:
 		level = 9
-	} else {
-		// default
+	default:
 		level = 9
 	}
 
