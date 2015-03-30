@@ -95,7 +95,10 @@ func compress(in *os.File, out *os.File, level uint, blocksize uint) {
 		h.Write(inb[:nr])
 
 		// try to compress
-		o, _ := z.Compress(inb[:nr])
+		o, err := z.Compress(inb[:nr])
+		if err != nil {
+			fatal("compression failed: ", err)
+		}
 
 		compressedSize := len(o)
 
