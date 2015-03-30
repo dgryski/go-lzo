@@ -1,5 +1,5 @@
+// Package lzo provides access to the LZO library, version 2.05
 /*
-Package LZO provides access to the LZO library, version 2.05
 
 License: GPLv3 or later
 
@@ -29,6 +29,7 @@ import (
 	"unsafe"
 )
 
+// Errno is an lzo error
 type Errno int
 
 var errText = map[Errno]string{
@@ -54,16 +55,16 @@ func (e Errno) Error() string {
 }
 
 var (
-	ErrOk                error = Errno(0)
-	ErrError             error = Errno(-1)
-	ErrOutOfMemory       error = Errno(-2) /* [not used right now] */
-	ErrNotCompressible   error = Errno(-3) /* [not used right now] */
-	ErrInputOverrun      error = Errno(-4)
-	ErrOutputOverrun     error = Errno(-5)
-	ErrLookbehindOverrun error = Errno(-6)
-	ErrEofNotFound       error = Errno(-7)
-	ErrInputNotConsumed  error = Errno(-8)
-	ErrNotYetImplemented error = Errno(-9) /* [not used right now] */
+	ErrOk                = Errno(0)
+	ErrError             = Errno(-1)
+	ErrOutOfMemory       = Errno(-2) /* [not used right now] */
+	ErrNotCompressible   = Errno(-3) /* [not used right now] */
+	ErrInputOverrun      = Errno(-4)
+	ErrOutputOverrun     = Errno(-5)
+	ErrLookbehindOverrun = Errno(-6)
+	ErrEofNotFound       = Errno(-7)
+	ErrInputNotConsumed  = Errno(-8)
+	ErrNotYetImplemented = Errno(-9) /* [not used right now] */
 )
 
 type LzoAlgorithm int
