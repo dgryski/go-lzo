@@ -238,11 +238,10 @@ func main() {
 	}
 
 	outFile, err := os.Create(flag.Arg(1))
-	defer outFile.Close()
-
 	if err != nil {
 		fatal("output file: ", err)
 	}
+	defer outFile.Close()
 
 	if *flagDecompress {
 		doDecompress(inFile, outFile)
