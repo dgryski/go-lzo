@@ -57,7 +57,7 @@ func fatal(a ...interface{}) {
 	os.Exit(1)
 }
 
-func doCompress(in *os.File, out *os.File, level uint, blocksize uint) {
+func compress(in *os.File, out *os.File, level uint, blocksize uint) {
 
 	out.Write(magicHeader[:])
 
@@ -124,7 +124,7 @@ func doCompress(in *os.File, out *os.File, level uint, blocksize uint) {
 	return
 }
 
-func doDecompress(in *os.File, out *os.File) {
+func decompress(in *os.File, out *os.File) {
 
 	var magic [7]byte
 
@@ -244,8 +244,8 @@ func main() {
 	defer outFile.Close()
 
 	if *flagDecompress {
-		doDecompress(inFile, outFile)
+		decompress(inFile, outFile)
 	} else {
-		doCompress(inFile, outFile, level, blocksize)
+		compress(inFile, outFile, level, blocksize)
 	}
 }
