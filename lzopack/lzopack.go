@@ -207,14 +207,14 @@ func main() {
 	//        var flag_block_size *int = flag.Int("block-size", 256*1024, "block size to use for compression")
 	const blocksize = 256 * 1024
 
-	flagBestSpeed := flag.Bool("1", false, "Use fastest compression algorithm")
-	flagBestCompression := flag.Bool("9", false, "Use best compression algorithm")
-	flagDecompress := flag.Bool("d", false, "Decompress")
+	flagBestSpeed := flag.Bool("1", false, "use fastest compression algorithm")
+	flagBestCompression := flag.Bool("9", false, "use best compression algorithm")
+	flagDecompress := flag.Bool("d", false, "decompress")
 
 	flag.Parse()
 
 	if flag.NArg() != 2 {
-		fmt.Println("usage: lzopack [ -1 | -9 ] [ -d ] in-file out-file")
+		fmt.Println("usage: lzopack [ -1 | -9 |  -d ] in-file out-file")
 		os.Exit(1)
 	}
 
