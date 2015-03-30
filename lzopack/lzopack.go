@@ -10,13 +10,14 @@ import (
 	"encoding/binary"
 	"flag"
 	"fmt"
-	"github.com/dgryski/dgolzo"
 	"hash/adler32"
 	"io"
 	"os"
+
+	"github.com/dgryski/dgolzo"
 )
 
-var MagicHeader [7]byte = [...]byte{0x00, 0xe9, 0x4c, 0x5a, 0x4f, 0xff, 0x1a}
+var magicHeader = [...]byte{0x00, 0xe9, 0x4c, 0x5a, 0x4f, 0xff, 0x1a}
 
 func read8(r io.Reader) uint {
 	var u uint8
@@ -56,9 +57,9 @@ func fatal(a ...interface{}) {
 	os.Exit(1)
 }
 
-func do_compress(in *os.File, out *os.File, level uint, blocksize uint) {
+func doCompress(in *os.File, out *os.File, level uint, blocksize uint) {
 
-	out.Write(MagicHeader[:])
+	out.Write(magicHeader[:])
 
 	write32(out, 1)                // flags
 	write8(out, 1)                 // method
@@ -96,16 +97,16 @@ func do_compress(in *os.File, out *os.File, level uint, blocksize uint) {
 		// try to compress
 		o, _ := z.Compress(inb[:nr])
 
-		compressed_size := len(o)
+		compressedSize := len(o)
 
 		// we didn't compress it
-		if compressed_size > nr {
+		if compressedSize > nr {
 			write32(out, uint32(nr))
 			write32(out, uint32(nr))
 			out.Write(inb[:nr])
 		} else {
 			write32(out, uint32(nr))
-			write32(out, uint32(compressed_size))
+			write32(out, uint32(compressedSize))
 			out.Write(o)
 		}
 	}
@@ -123,46 +124,46 @@ func do_compress(in *os.File, out *os.File, level uint, blocksize uint) {
 	return
 }
 
-func do_decompress(in *os.File, out *os.File) {
+func doDecompress(in *os.File, out *os.File) {
 
 	var magic [7]byte
 
 	in.Read(magic[:])
 
-	if bytes.Compare(magic[:], MagicHeader[:]) != 0 {
+	if bytes.Compare(magic[:], magicHeader[:]) != 0 {
 		fatal("header error -- this file was not compressed with lzopack")
 	}
 
 	flags := read32(in)
 	method := read8(in)
 	level := read8(in)
-	block_size := read32(in)
+	blockSize := read32(in)
 
 	if method != 1 {
 		fatal("header error - unknown compression method: ", method, " (level: ", level, ")")
 	}
 
-	if block_size < 1024 || block_size > 8*1024*1024 {
-		fatal("header error -- invalid block size: ", block_size)
+	if blockSize < 1024 || blockSize > 8*1024*1024 {
+		fatal("header error -- invalid block size: ", blockSize)
 	}
 
 	z, _ := lzo.NewCompressor(lzo.Lzo1x_1)
 	h := adler32.New()
-	inb := make([]byte, block_size+block_size/16+64+3)
+	inb := make([]byte, blockSize+blockSize/16+64+3)
 
 	for {
 
-		uncompressed_blocksize := read32(in)
+		uncompressedBlocksize := read32(in)
 
 		// end of compressed blocks?
-		if uncompressed_blocksize == 0 {
+		if uncompressedBlocksize == 0 {
 			break
 		}
 
-		outb := make([]byte, uncompressed_blocksize)
+		outb := make([]byte, uncompressedBlocksize)
 
-		compressed_blocksize := read32(in)
-		nr, err := in.Read(inb[:compressed_blocksize])
+		compressedBlocksize := read32(in)
+		nr, err := in.Read(inb[:compressedBlocksize])
 
 		if nr == 0 {
 			fatal("unexpected end of file")
@@ -172,16 +173,16 @@ func do_decompress(in *os.File, out *os.File) {
 			fatal(err)
 		}
 
-		if compressed_blocksize == uncompressed_blocksize {
+		if compressedBlocksize == uncompressedBlocksize {
 			// data was uncompressible -- nothing to decompress
-			out.Write(inb[:compressed_blocksize])
-			h.Write(inb[:compressed_blocksize])
+			out.Write(inb[:compressedBlocksize])
+			h.Write(inb[:compressedBlocksize])
 			continue
 		}
 
-		sz, err := z.Decompress(inb[:compressed_blocksize], outb)
+		sz, err := z.Decompress(inb[:compressedBlocksize], outb)
 
-		if sz != uncompressed_blocksize || err != nil {
+		if sz != uncompressedBlocksize || err != nil {
 			fatal("compressed data violation")
 		}
 
@@ -204,11 +205,11 @@ func do_decompress(in *os.File, out *os.File) {
 func main() {
 
 	//        var flag_block_size *int = flag.Int("block-size", 256*1024, "block size to use for compression")
-	blocksize := uint(256 * 1024)
+	const blocksize = 256 * 1024
 
-	var flag_best_speed *bool = flag.Bool("1", false, "Use fastest compression algorithm")
-	var flag_best_compression *bool = flag.Bool("9", false, "Use best compression algorithm")
-	var flag_decompress *bool = flag.Bool("d", false, "Decompress")
+	flagBestSpeed := flag.Bool("1", false, "Use fastest compression algorithm")
+	flagBestCompression := flag.Bool("9", false, "Use best compression algorithm")
+	flagDecompress := flag.Bool("d", false, "Decompress")
 
 	flag.Parse()
 
@@ -219,39 +220,37 @@ func main() {
 
 	var level uint
 
-	if *flag_best_speed && *flag_best_compression {
+	if *flagBestSpeed && *flagBestCompression {
 		fmt.Fprintln(os.Stderr, "Can only specify one of -1 -9")
 		os.Exit(1)
-	} else if *flag_best_speed {
+	} else if *flagBestSpeed {
 		level = 1
-	} else if *flag_best_compression {
+	} else if *flagBestCompression {
 		level = 9
 	} else {
 		// default
 		level = 9
 	}
 
-	if *flag_best_speed && *flag_best_compression && *flag_decompress {
+	if *flagBestSpeed && *flagBestCompression && *flagDecompress {
 		// passing compression levels when decompressing is pointless
 	}
 
-	in_file, err := os.Open(flag.Arg(0))
+	inFile, err := os.Open(flag.Arg(0))
 	if err != nil {
 		fatal("input file: ", err)
 	}
 
-	out_file, err := os.Create(flag.Arg(1))
+	outFile, err := os.Create(flag.Arg(1))
+	defer outFile.Close()
 
 	if err != nil {
 		fatal("output file: ", err)
 	}
 
-	if *flag_decompress {
-		do_decompress(in_file, out_file)
+	if *flagDecompress {
+		doDecompress(inFile, outFile)
 	} else {
-		do_compress(in_file, out_file, level, blocksize)
+		doCompress(inFile, outFile, level, blocksize)
 	}
-
-	out_file.Close()
-
 }
