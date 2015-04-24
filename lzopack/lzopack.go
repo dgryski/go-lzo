@@ -14,7 +14,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/dgryski/dgolzo"
+	"github.com/dgryski/go-lzo"
 )
 
 var magicHeader = [...]byte{0x00, 0xe9, 0x4c, 0x5a, 0x4f, 0xff, 0x1a}
